@@ -5,7 +5,7 @@ ROOTFS="/home/crz/.local/var/lib/dockie/guests/ubuntu/rootfs/"
 set -eu
 
 _run() {
-	unshare -u -p /proc/self/exe "$0" child "$@"
+	fakeroot unshare -u -p /proc/self/exe "$0" child "$@"
 }
 
 _child() {
