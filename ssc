@@ -1,13 +1,24 @@
-#!/usr/bin/env sh
-# 
-# Things to take into account: 
-# 
-#     * if /proc/sys/kernel/unprivileged_userns_clone is 0 you won't be able
-#       to do this without root privileges, changing that value fixes it
-# 
-#     * network is NOT containerized, if you need this, this script is not for
-#       you
-# 
-awk '/^# / { gsub(/# /,""); print }' "$0" >&2
-unshare --mount --uts --ipc --pid --fork --user --map-root-user \
+#!/bin/sh
+
+set -eu
+
+if [ "$$" = 1 ]; then
+	export USER="root"
+	export HOME="/root"
+
+	hostname "$(basename "$1")"
+	mount --rbind /dev "$1/dev"
+	mount -t proc proc "$1/proc"
+
 	/usr/sbin/chroot "$@"
+else
+	env -i unshare \
+		--fork \
+		--ipc \
+		--map-root-user \
+		--mount \
+		--pid \
+		--user \
+		--uts \
+		/proc/self/exe "$0" "$@"
+fi
