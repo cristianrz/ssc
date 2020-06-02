@@ -2,23 +2,13 @@
 
 set -eu
 
-if [ "$$" = 1 ]; then
-	export USER="root"
-	export HOME="/root"
-
-	hostname "$(basename "$1")"
-	mount --rbind /dev "$1/dev"
-	mount -t proc proc "$1/proc"
-
-	/usr/sbin/chroot "$@"
-else
-	env -i unshare \
-		--fork \
-		--ipc \
-		--map-root-user \
-		--mount \
-		--pid \
-		--user \
-		--uts \
-		/proc/self/exe "$0" "$@"
-fi
+env -i unshare \
+	--fork \
+	--ipc \
+	--map-root-user \
+	--mount \
+	--mount-proc \
+	--pid \
+	--user \
+	--uts \
+	-R "$@"
